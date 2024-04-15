@@ -41,21 +41,9 @@ class Nave:
         self.tempo = 0
         self.contagem_imagem = 0
         self.imagem = self.NAVE
-    #     self.tiro = self.TIRO
-    
-    # def atirar(self, tela):
-    #     self.velocidade = 15
-    #     self.tempo = 0
-    #     self.altura = self.y
-    #     self.imagem = self.TIRO
-
-    #     #desenhar a imagem
-    #     pos_centro_imagem = self.imagem.get_rect(topleft=(self.x, self.y)).center
-    #     retangulo = self.imagem.get_rect(center=pos_centro_imagem)
-    #     tela.blit(self.imagem, retangulo.topleft)
 
     def atirar(self, projeteis): #
-        projetil = Projetil(self.x, self.y)  # Cria um novo projetil na posição da nave
+        projetil = Projetil(self.x +140, self.y +70)  # Cria um novo projetil na posição da nave
         projeteis.append(projetil)  # Adiciona o projetil à lista de projeteis
 
     def mover(self):
@@ -68,7 +56,8 @@ class Nave:
         #desenhar a imagem
         pos_centro_imagem = self.imagem.get_rect(topleft=(self.x, self.y)).center
         retangulo = self.imagem.get_rect(center=pos_centro_imagem)
-        tela.blit(self.imagem, retangulo.topleft)
+        tela.blit(self.imagem, retangulo)
+
 
     def get_mask(self):
         return pygame.mask.from_surface(self.imagem)
@@ -86,7 +75,33 @@ class Nave:
     #         return True
     #     else:
     #         return False
+class Arma:
+    VELOCIDADE = 2
+    IMAGEM = pygame.transform.flip(IMAGEM_ARMA, True, False)
 
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        
+    def mover(self):
+        self.x -= self.VELOCIDADE
+
+    def lock(self, nave):
+        self.x = nave.x + 45
+        self.y = nave.y + 35
+        self.IMAGEM = pygame.transform.flip(self.IMAGEM, True, False)
+    
+    def atirar(self, projeteis): #
+        projetil = Projetil(self.x +100, self.y +200)  # Cria um novo projetil na posição da nave
+        projeteis.append(projetil)  # Adiciona o projetil à lista de projeteis
+
+    def desenhar(self, tela):
+        pos_centro_imagem = self.IMAGEM.get_rect(topleft=(self.x, self.y)).center
+        tela.blit(self.IMAGEM, pos_centro_imagem)
+    
+    def get_mask(self):
+        return pygame.mask.from_surface(self.IMAGEM)
+    
 class Projetil:
     TIRO = IMAGEM_PROJETIL
     #animações de rotação
@@ -105,18 +120,16 @@ class Projetil:
         return 20  # Ou qualquer outro valor que desejar
         
     def mover(self):
+        #calcular deslocamento
         deslocamento = 3
         self.velocidade = 15
         self.x += deslocamento
-        #calcular deslocamento
         
-
     def desenhar(self, tela):
-        #denifir qual imagem vai usar
         #desenhar a imagem
         pos_centro_imagem = self.imagem.get_rect(topleft=(self.x, self.y)).center
-        #retangulo = self.imagem.get_rect(center=pos_centro_imagem)
-        tela.blit(self.imagem, pos_centro_imagem)
+        retangulo = self.imagem.get_rect(center=pos_centro_imagem)
+        tela.blit(self.imagem, retangulo)
 
     def get_mask(self):
         return pygame.mask.from_surface(self.imagem)
@@ -210,31 +223,7 @@ class Fundo:
     def desenhar(self, tela):
         tela.blit(self.IMAGEM, (self.x, self.y))
 
-class Arma:
-    VELOCIDADE = 2
-    IMAGEM = IMAGEM_ARMA
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        
-
-    def mover(self):
-        self.x -= self.VELOCIDADE
-
-    def lock(self, nave):
-        self.x = nave.x +  15
-        self.y = nave.y - 15
-
-    def desenhar(self, tela):
-        pos_centro_imagem = self.IMAGEM.get_rect(topleft=(self.x, self.y)).center
-        tela.blit(self.IMAGEM, pos_centro_imagem)
-    
-    def get_mask(self):
-        return pygame.mask.from_surface(self.IMAGEM)
-
-
-def desenhar_tela(tela, fundo, naves, armas,  projeteis, inimigos, chao, pontos, danos):
+def desenhar_tela(tela, fundo, naves, armas,  projeteis, inimigos, chao, pontos, danos, arma_travada):
     #tela.blit(IMAGEM_BACKGROUND, (0 , 0))
     fundo.desenhar(tela)
 
@@ -252,16 +241,16 @@ def desenhar_tela(tela, fundo, naves, armas,  projeteis, inimigos, chao, pontos,
 
     texto = FONTE_PONTOS.render(f'Pontuação: {pontos}', 1, (255, 255, 255))
     cont_dano = FONTE_ERROS.render(f'Dano: {danos}', 1, (255, 1, 1))  # Usando danos[0]
+    arma_travada = FONTE_PONTOS.render(f'Arma Travada: {arma_travada}',  1, (255, 1, 255))
     tela.blit(texto, (TELA_LARGURA - 10 - texto.get_width(), 10))
     tela.blit(cont_dano, (10, 10))
+    tela.blit(arma_travada, (200, 10))
     chao.desenhar(tela)
     pygame.display.update()
 
-# ... (seu código anterior)
-
 def main():
     naves = [Nave(230,350)]
-    armas = [Arma(1400, 500)]
+    armas = [Arma(1400, 500) ] #Arma(1400, 500)
     projeteis = []
     chao = Chao(730)
     fundo = Fundo()
@@ -270,12 +259,13 @@ def main():
     pontos = 0
     danos = 0
     relogio = pygame.time.Clock()
+    
 
     rodando = True
     while rodando:
         relogio.tick(30)
         fundo.mover()
-
+        arma_travada = False
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
@@ -283,10 +273,13 @@ def main():
                 quit()
 
             for nave in naves:
-                if evento.type == pygame.KEYDOWN:
-                    if evento.key == pygame.K_SPACE:
-                        nave.atirar(projeteis)
-                        
+                for arma in armas:
+                    if evento.type == pygame.KEYDOWN:
+                        if evento.key == pygame.K_SPACE:
+                            if arma_travada == True:
+                                arma.atirar(projeteis)
+                            elif arma_travada == False:
+                                nave.atirar(projeteis)
 
         teclas = pygame.key.get_pressed()
 
@@ -325,14 +318,10 @@ def main():
         for  arma in armas:
             for nave in naves:
                 if nave.get_mask().overlap(arma.get_mask(), (arma.x - nave.x, arma.y -  nave.y)):
-                    #arma.lock(nave)
-                    arma.x = nave.x +  15
-                    arma.y = nave.y - 15
-        
-                    # arma.x = nave.x + 20
-                    # arma .y = nave .y  - 20
+                    arma.lock(nave)
+                    arma_travada = True
 
-        desenhar_tela(tela, fundo, naves, armas, projeteis, inimigos, chao, pontos, danos)
+        desenhar_tela(tela, fundo, naves, armas, projeteis, inimigos, chao, pontos, danos, arma_travada)
 
 if __name__ == '__main__':
-    main()
+    main() 
