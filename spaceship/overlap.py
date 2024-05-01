@@ -22,10 +22,16 @@ WHITE = (255,255,255)
 pygame.mouse.set_visible(False)
 
 #create nave
-nave = pygame.transform.scale2x(pygame.image.load(os.path.join('FlappyBird\spaceship', '2ndship.png')))
+nave = pygame.transform.scale2x(pygame.image.load(os.path.join('Shootem_up\spaceship','2ndship.png')))
 nave_rect = nave.get_rect()
+nave_rect.topleft = (x, y)
 nave_mask = pygame.mask.from_surface(nave)
 mask_image = nave_mask.to_surface()
+
+#Create bullet and mask
+bullet = pygame.Surface((10,10))
+bullet.fill(RED)
+bullet_mask = pygame.mask.from_surface(bullet)
 
 #game loop
 running = True
@@ -36,11 +42,18 @@ while running:
     #update background
     screen.fill(BG)
 
+    #Check mask overlap
+    if nave_mask.overlap(bullet_mask, (pos[0] - nave_mask.x, pos[1] - nave_mask.y)):
+        col = RED
+    else:
+        col = GREEN
+                         
+
     #Draw nave
     screen.blit(mask_image,(0, 0))
 
     #draw rectangle
-    screen.blit(nave, pos)
+    screen.blit(bullet, pos)
 
     #event handling
     for event in pygame.event.get():
