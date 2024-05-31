@@ -1,9 +1,11 @@
-from imgs import imagens as imgs
+from assets.imgs import imagens as imgs
 
 class Chao:
     VELOCIDADE = 5
     LARGURA = imgs.IMAGEM_CHAO[0].get_width()
+    ALTURA = imgs.IMAGEM_CHAO[0].get_height()
     IMAGEM = imgs.IMAGEM_CHAO[0]
+    TELA_ALTURA = 800
 
     def __init__(self, y):
         self.y = y
@@ -35,12 +37,10 @@ class Chao:
             self.x2 = self.x1 + self.LARGURA
 
     def desenhar(self, tela):
-        tela.blit(self.IMAGEM, (self.x, self.y))
-        tela.blit(self.IMAGEM, (self.x1, self.y))
-        tela.blit(self.IMAGEM, (self.x2, self.y))
-        tela.blit(self.IMAGEM, (self.x3, self.y))
-        tela.blit(self.IMAGEM, (self.x4, self.y))
-        tela.blit(self.IMAGEM, (self.x5, self.y))
+        for x in range (15):
+            tela.blit(self.IMAGEM, ((x * self.LARGURA) - self.VELOCIDADE * 2.5, self.TELA_ALTURA - self.ALTURA))
+        #tela.blit(self.IMAGEM, (self.x, self.y))
+
 
 class Fundo:
     VELOCIDADE = 2

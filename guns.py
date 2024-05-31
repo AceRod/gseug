@@ -1,5 +1,6 @@
-from imgs import imagens as imgs
+from assets.imgs import imagens as imgs
 import pygame
+
 
 class Arma:
     VELOCIDADE = 2
